@@ -14,7 +14,7 @@ COPY VERSION .
 # Build frontend
 RUN DISABLE_ESLINT_PLUGIN=true \
     VITE_REACT_APP_VERSION=$(cat VERSION) \
-    bun run build
+    bun run build -- --root web
 
 
 # ---------- BACKEND BUILD ----------
