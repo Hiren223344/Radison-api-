@@ -1,23 +1,24 @@
-# ---------- FRONTEND BUILD ----------
+# ================= FRONTEND BUILD =================
 FROM oven/bun:latest AS builder
 
-WORKDIR /build
+# Work inside web folder so Vite finds index.html
+WORKDIR /build/web
 
-# Copy only dependency files first (cache-friendly)
+# Copy dependency files first (better cache)
 COPY web/package.json web/bun.lock* ./
 RUN bun install
 
-# Copy rest of frontend
-COPY web ./web
-COPY VERSION .
+# Copy rest of frontend source
+COPY web .
+COPY VERSION ..
 
 # Build frontend
 RUN DISABLE_ESLINT_PLUGIN=true \
-    VITE_REACT_APP_VERSION=$(cat VERSION) \
-    bun run build -- --root web
+    VITE_REACT_APP_VERSION=$(cat ../VERSION) \
+    bun run build
 
 
-# ---------- BACKEND BUILD ----------
+# ================= BACKEND BUILD =================
 FROM golang:alpine AS builder2
 
 ENV GO111MODULE=on \
@@ -31,7 +32,7 @@ ENV GOOS=${TARGETOS:-linux} \
 
 WORKDIR /build
 
-# Go deps
+# Go dependencies
 COPY go.mod go.sum ./
 RUN go mod download
 
@@ -39,14 +40,14 @@ RUN go mod download
 COPY . .
 
 # Copy frontend build output
-COPY --from=builder /build/dist ./web/dist
+COPY --from=builder /build/web/dist ./web/dist
 
 # Build Go binary
 RUN go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$(cat VERSION)'" \
     -o new-api
 
 
-# ---------- RUNTIME IMAGE ----------
+# ================= RUNTIME IMAGE =================
 FROM debian:bookworm-slim
 
 RUN apt-get update \
