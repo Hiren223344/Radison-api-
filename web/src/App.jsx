@@ -49,6 +49,7 @@ import PersonalSetting from './components/settings/PersonalSetting';
 import Setup from './pages/Setup';
 import SetupCheck from './components/layout/SetupCheck';
 
+
 const Home = lazy(() => import('./pages/Home'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const About = lazy(() => import('./pages/About'));
@@ -58,6 +59,7 @@ const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 function App() {
   const location = useLocation();
   const [statusState] = useContext(StatusContext);
+   document.title = 'Api | Radison'
 
   // 获取模型广场权限配置
   const pricingRequireAuth = useMemo(() => {
